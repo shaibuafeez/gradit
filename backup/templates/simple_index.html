@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automated Essay Scoring System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="has-navbar-fixed-top">
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-graduation-cap me-2"></i>
+                <span>Essay</span>Scorer
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#score-essay"><i class="fas fa-pencil-alt me-1"></i> Score Essay</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#marking-guide"><i class="fas fa-clipboard-list me-1"></i> Marking Guide</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about"><i class="fas fa-info-circle me-1"></i> About</a>
+                    </li>
+                    <li class="nav-item" id="login-nav-item">
+                        <button class="btn btn-outline-primary ms-2" data-bs-toggle="modal" data-bs-target="#loginModal">
+                            <i class="fas fa-sign-in-alt me-1"></i> Login
+                        </button>
+                    </li>
+                    <li class="nav-item" id="register-nav-item">
+                        <button class="btn btn-primary ms-2" data-bs-toggle="modal" data-bs-target="#registerModal">
+                            <i class="fas fa-user-plus me-1"></i> Register
+                        </button>
+                    </li>
+                    <li class="nav-item dropdown" id="user-dropdown" style="display: none;">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i> <span id="username-display">User</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" id="dashboard-link"><i class="fas fa-tachometer-alt me-1"></i> Dashboard</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logout-link"><i class="fas fa-sign-out-alt me-1"></i> Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <span class="badge bg-primary-light text-primary mb-3">AI-Powered Essay Evaluation</span>
+                    <h1 class="display-4 fw-bold mb-4">Transform Your <span class="text-gradient">Writing</span> With Instant Feedback</h1>
+                    <p class="lead mb-5">
+                        Our advanced AI system analyzes your essays and provides detailed feedback to help you improve your writing skills. Get instant scores, personalized suggestions, and track your progress over time.
+                    </p>
+                    <div class="mb-4">
+                        <a href="#score-essay" class="btn btn-primary btn-lg">
+                            <i class="fas fa-pencil-alt me-2"></i>Score Your Essay
+                        </a>
+                        <a href="#about" class="btn btn-outline-dark btn-lg">
+                            <i class="fas fa-info-circle me-2"></i>Learn More
+                        </a>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="d-flex">
+                            <div class="avatar-stack">
+                                <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="User" class="avatar">
+                                <img src="https://randomuser.me/api/portraits/men/44.jpg" alt="User" class="avatar">
+                                <img src="https://randomuser.me/api/portraits/women/55.jpg" alt="User" class="avatar">
+                                <div class="avatar avatar-more">+</div>
+                            </div>
+                        </div>
+                        <div class="ms-3">
+                            <p class="mb-0"><strong>Trusted by educators</strong></p>
+                            <div class="text-muted">Join thousands of teachers and students</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 d-none d-lg-block position-relative mt-5 mt-lg-0">
+                    <div class="hero-image-container">
+                        <img src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1073&q=80" 
+                             alt="Student writing an essay" class="hero-image">
+                        <div class="floating-card card-1">
+                            <div class="card-icon"><i class="fas fa-brain"></i></div>
+                            <div class="card-text">
+                                <h6>AI Analysis</h6>
+                                <p>Advanced NLP models</p>
+                            </div>
+                        </div>
+                        <div class="floating-card card-2">
+                            <div class="card-icon"><i class="fas fa-chart-line"></i></div>
+                            <div class="card-text">
+                                <h6>Instant Results</h6>
+                                <p>Detailed feedback</p>
+                            </div>
+                        </div>
+                        <div class="floating-tags">
+                            <div class="tag-container">
+                                <span class="badge rounded-pill bg-light text-dark">Structure</span>
+                            </div>
+                            <div class="tag-container">
+                                <span class="badge rounded-pill bg-light text-dark">Grammar</span>
+                            </div>
+                            <div class="tag-container">
+                                <span class="badge rounded-pill bg-light text-dark">Evidence</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="hero-shape-bottom">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="#ffffff" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,133.3C672,139,768,181,864,197.3C960,213,1056,203,1152,176C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger" id="login-error" style="display: none;"></div>
+                    <form id="login-form">
+                        <div class="mb-3">
+                            <label for="login-email" class="form-label">Email address</label>
+                            <input type="email" class="form-control" id="login-email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="login-password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="login-password" required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <p class="mb-0">Don't have an account? <a href="#" data-bs-toggle="modal" data-bs-target="#registerModal" data-bs-dismiss="modal">Register</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="registerModalLabel">Register</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger" id="register-error" style="display: none;"></div>
+                    <form id="register-form">
+                        <div class="mb-3">
+                            <label for="register-name" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="register-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="register-email" class="form-label">Email address</label>
+                            <input type="email" class="form-control" id="register-email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="register-password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="register-password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="register-role" class="form-label">Role</label>
+                            <select class="form-select" id="register-role" required>
+                                <option value="student">Student</option>
+                                <option value="teacher">Teacher</option>
+                            </select>
+                        </div>
+                        <div class="mb-3" id="matric-number-group">
+                            <label for="register-matric" class="form-label">Matric Number</label>
+                            <input type="text" class="form-control" id="register-matric">
+                            <div class="form-text">Required for students</div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-user-plus me-2"></i>Register
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <p class="mb-0">Already have an account? <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal" data-bs-dismiss="modal">Login</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Modal -->
+    <div class="modal fade" id="dashboardModal" tabindex="-1" aria-labelledby="dashboardModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="dashboardModalLabel">Dashboard</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs mb-4" id="dashboardTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="courses-tab" data-bs-toggle="tab" data-bs-target="#courses-tab-pane" type="button" role="tab" aria-controls="courses-tab-pane" aria-selected="true">
+                                <i class="fas fa-book me-1"></i> Courses
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="exams-tab" data-bs-toggle="tab" data-bs-target="#exams-tab-pane" type="button" role="tab" aria-controls="exams-tab-pane" aria-selected="false">
+                                <i class="fas fa-file-alt me-1"></i> Exams
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="progress-tab" data-bs-toggle="tab" data-bs-target="#progress-tab-pane" type="button" role="tab" aria-controls="progress-tab-pane" aria-selected="false">
+                                <i class="fas fa-chart-line me-1"></i> Progress
+                            </button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="dashboardTabsContent">
+                        <div class="tab-pane fade show active" id="courses-tab-pane" role="tabpanel" aria-labelledby="courses-tab" tabindex="0">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h4 class="mb-0">My Courses</h4>
+                                <button class="btn btn-primary" id="add-course-btn">
+                                    <i class="fas fa-plus me-1"></i> Add Course
+                                </button>
+                            </div>
+                            <div id="courses-list">
+                                <div class="text-center py-5">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="mt-2">Loading courses...</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="exams-tab-pane" role="tabpanel" aria-labelledby="exams-tab" tabindex="0">
+                            <h4 class="mb-4">My Exams</h4>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i> Select a course to view its exams.
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="progress-tab-pane" role="tabpanel" aria-labelledby="progress-tab" tabindex="0">
+                            <h4 class="mb-4">My Progress</h4>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i> Your progress and statistics will appear here as you complete exams and receive essay scores.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Course Modal -->
+    <div class="modal fade" id="courseModal" tabindex="-1" aria-labelledby="courseModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="course-title">Course Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="course-content">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading course details...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Course Modal -->
+    <div class="modal fade" id="addCourseModal" tabindex="-1" aria-labelledby="addCourseModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addCourseModalLabel">Add New Course</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger" id="add-course-error" style="display: none;"></div>
+                    <form id="add-course-form">
+                        <div class="mb-3">
+                            <label for="course-code" class="form-label">Course Code</label>
+                            <input type="text" class="form-control" id="course-code" required>
+                            <div class="form-text">E.g., CS101, ENG205</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="course-title" class="form-label">Course Title</label>
+                            <input type="text" class="form-control" id="course-title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="course-description" class="form-label">Description</label>
+                            <textarea class="form-control" id="course-description" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="course-units" class="form-label">Units</label>
+                            <select class="form-select" id="course-units" required>
+                                <option value="2">2 Units</option>
+                                <option value="3">3 Units</option>
+                                <option value="4">4 Units</option>
+                            </select>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Create Course
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/simple_auth.js"></script>
+</body>
+</html>

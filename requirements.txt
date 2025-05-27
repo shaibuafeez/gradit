@@ -1,0 +1,20 @@
+numpy
+pandas
+flask
+torch
+transformers
+scikit-learn
+spacy
+nltk
+tqdm
+matplotlib
+flask-sqlalchemy
+flask-login
+flask-wtf
+email-validator
+flask-mail
+flask-cors==4.0.0
+# AES System Dependencies
+requests==2.31.0
+google-genai==0.1.0
+python-dotenv==1.0.0

@@ -1,0 +1,41 @@
+/* Styling for the login modal */
+.demo-credentials {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.demo-account {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 12px;
+    background-color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid #e9ecef;
+}
+
+.demo-account:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-color: #4361ee;
+}
+
+.bg-light-blue {
+    background-color: #e7f3ff !important;
+}
+
+.login-btn {
+    background-color: #4361ee;
+    border-color: #4361ee;
+    font-weight: 500;
+    padding: 10px 16px;
+}
+
+.login-btn:hover {
+    background-color: #3a56d4;
+    border-color: #3a56d4;
+}

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 20px;
+        }
+        .dashboard-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .welcome-message {
+            margin-bottom: 20px;
+        }
+        .card {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="dashboard-container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Dashboard</h2>
+                <a href="/logout" class="btn btn-outline-danger">Logout</a>
+            </div>
+            
+            <div class="alert alert-success welcome-message">
+                <h4>Welcome, {{ user.name }}!</h4>
+                <p>You are logged in as a {{ user.role }}.</p>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Courses</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>You have access to 3 courses.</p>
+                            <ul>
+                                <li>English Composition</li>
+                                <li>Advanced Writing</li>
+                                <li>Research Methods</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Exams</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>You have 2 upcoming exams.</p>
+                            <ul>
+                                <li>Midterm Essay (Tomorrow)</li>
+                                <li>Final Research Paper (Next Week)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Recent Activity</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>Your recent activities:</p>
+                            <ul>
+                                <li>Submitted practice essay (2 days ago)</li>
+                                <li>Completed quiz (1 week ago)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if user.role == 'teacher' %}
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5>Teacher Tools</h5>
+                </div>
+                <div class="card-body">
+                    <p>Special tools for teachers:</p>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary">Create Course</button>
+                        <button class="btn btn-success">Add Exam</button>
+                        <button class="btn btn-info">Manage Students</button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

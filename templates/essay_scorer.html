@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gradit - Essay Scoring Tool</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            padding-top: 70px;
+            background-color: #f8f9fa;
+        }
+        .navbar {
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .card {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .feedback-card {
+            display: none;
+        }
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background-color: #4CAF50;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            margin: 0 auto 20px;
+        }
+        .teacher-grading {
+            display: none;
+        }
+        .loading-spinner {
+            display: none;
+        }
+        .strength-item, .improvement-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .strength-item {
+            background-color: rgba(40, 167, 69, 0.1);
+        }
+        .improvement-item {
+            background-color: rgba(255, 193, 7, 0.1);
+        }
+    </style>
+</head>
+<body class="has-navbar-fixed-top">
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-graduation-cap me-2"></i>
+                <span>Grad</span>it
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if user %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">
+                            <i class="fas fa-tachometer-alt me-1"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/essay-scorer">
+                            <i class="fas fa-pencil-alt me-1"></i> Essay Scorer
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">
+                            <i class="fas fa-sign-out-alt me-1"></i> Logout ({{ user.name }})
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home me-1"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/essay-scorer">
+                            <i class="fas fa-pencil-alt me-1"></i> Essay Scorer
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">
+                            <i class="fas fa-sign-in-alt me-1"></i> Login
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            {% if user and user.role == 'teacher' and action == 'grade' %}
+                                <i class="fas fa-pen-fancy me-2"></i>AI Essay Grading Tool
+                            {% elif action == 'submit' %}
+                                <i class="fas fa-file-upload me-2"></i>Submit New Essay
+                            {% else %}
+                                <i class="fas fa-pencil-alt me-2"></i>My Essays
+                            {% endif %}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if action == 'view' %}
+                            <!-- Essay Viewing Mode -->
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                {% if user.role == 'student' %}
+                                    View your submitted essays and feedback below.
+                                {% else %}
+                                    View all student essay submissions below.
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Essay List Table -->
+                            <div class="table-responsive mt-3">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Title/Prompt</th>
+                                            <th>Submission Date</th>
+                                            <th>Status</th>
+                                            <th>Score</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- This would be populated from the database -->
+                                        <tr>
+                                            <td>The Importance of Education</td>
+                                            <td>May 25, 2025</td>
+                                            <td><span class="badge bg-success">Graded</span></td>
+                                            <td>85%</td>
+                                            <td>
+                                                <a href="#" class="btn btn-sm btn-primary"><i class="fas fa-eye me-1"></i> View</a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% elif action == 'submit' or (user.role == 'student' and action != 'view') %}
+                            <!-- Essay Submission Form -->
+                            <form id="essay-form">
+                                <div class="mb-3">
+                                    <label for="prompt-text" class="form-label">Essay Prompt</label>
+                                    <input type="text" class="form-control" id="prompt-text" placeholder="Enter the essay prompt or topic" value="Write about the importance of education in modern society.">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="essay-text" class="form-label">Essay Text</label>
+                                    <textarea class="form-control" id="essay-text" rows="10" placeholder="Paste your essay here..."></textarea>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-paper-plane me-2"></i>Submit Essay
+                                    </button>
+                                </div>
+                            </form>
+                        {% elif user.role == 'teacher' and action == 'grade' %}
+                            <!-- Teacher Grading Interface -->
+                            <div class="alert alert-warning">
+                                <i class="fas fa-lock me-2"></i>
+                                <strong>Teacher Access Only:</strong> This AI grading tool is restricted to teachers for evaluating student essays.
+                            </div>
+                            
+                            <form id="essay-form">
+                                <div class="mb-3">
+                                    <label for="prompt-text" class="form-label">Essay Prompt</label>
+                                    <input type="text" class="form-control" id="prompt-text" placeholder="Enter the essay prompt or topic" value="Write about the importance of education in modern society.">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="essay-text" class="form-label">Essay Text</label>
+                                    <textarea class="form-control" id="essay-text" rows="10" placeholder="Paste the student essay here..."></textarea>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-check-circle me-2"></i>Generate AI Feedback
+                                    </button>
+                                </div>
+                            </form>
+                        {% else %}
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                You do not have permission to access this feature.
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Loading Spinner -->
+                        <div class="text-center mt-4" id="loading-spinner" style="display: none;">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Analyzing your essay...</p>
+                        </div>
+                        
+                        <!-- Error Alert -->
+                        <div class="alert alert-danger mt-4" id="error-alert" style="display: none;">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <span id="error-message">An error occurred while scoring your essay.</span>
+                        </div>
+                        
+                        <!-- Feedback Card -->
+                        <div class="card mt-4" id="feedback-card" style="display: none;">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Essay Evaluation Results</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="text-center mb-4">
+                                    <div class="score-circle">
+                                        <span id="score-display">85%</span>
+                                    </div>
+                                    <p class="text-muted"><span id="total-points">85 / 100</span> points</p>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h5><i class="fas fa-thumbs-up text-success me-2"></i>Strengths</h5>
+                                        <ul class="list-group" id="strengths-list">
+                                            <!-- Strengths will be populated here -->
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h5><i class="fas fa-lightbulb text-warning me-2"></i>Areas for Improvement</h5>
+                                        <ul class="list-group" id="improvements-list">
+                                            <!-- Areas for improvement will be populated here -->
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <h5><i class="fas fa-comment-alt text-primary me-2"></i>Overall Feedback</h5>
+                                    <div class="p-3 bg-light rounded">
+                                        <p id="overall-feedback"></p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Teacher Grading Section (only visible to teachers) -->
+                                {% if user and user.role == 'teacher' %}
+                                <div class="card teacher-grading mt-4">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="mb-0"><i class="fas fa-chalkboard-teacher me-2"></i>Teacher Grading</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <form id="teacher-grading-form">
+                                            <div class="mb-3">
+                                                <label for="teacher-score" class="form-label">Score (0-100)</label>
+                                                <input type="number" class="form-control" id="teacher-score" min="0" max="100" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="teacher-feedback" class="form-label">Feedback</label>
+                                                <textarea class="form-control" id="teacher-feedback" rows="4" required></textarea>
+                                            </div>
+                                            <div class="d-grid">
+                                                <button type="submit" class="btn btn-primary">Save Grade</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                <div class="d-grid mt-4">
+                                    <button class="btn btn-outline-primary" id="newEssayBtn">
+                                        <i class="fas fa-redo me-2"></i>Score Another Essay
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/essay_scorer.js') }}"></script>
+</body>
+</html>

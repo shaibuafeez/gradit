@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gradit - Exam Results</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-dark: #3a56d4;
+            --primary-light: #e0e7ff;
+            --secondary-color: #7209b7;
+            --accent-color: #4cc9f0;
+            --success-color: #4ade80;
+            --success-light: #dcfce7;
+            --warning-color: #fbbf24;
+            --warning-light: #fef3c7;
+            --danger-color: #f87171;
+            --danger-light: #fee2e2;
+            --light-color: #f9fafb;
+            --dark-color: #1f2937;
+            --gray-color: #9ca3af;
+        }
+        
+        .navbar-brand span {
+            font-weight: 700;
+        }
+        
+        .badge-student {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 0.35em 0.65em;
+            font-size: 0.75em;
+            font-weight: 700;
+            border-radius: 0.25rem;
+        }
+        
+        .results-header {
+            background-color: var(--primary-light);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .score-card {
+            background-color: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            height: 100%;
+        }
+        
+        .score-value {
+            font-size: 3rem;
+            font-weight: 700;
+        }
+        
+        .score-excellent {
+            color: var(--success-color);
+        }
+        
+        .score-good {
+            color: var(--primary-color);
+        }
+        
+        .score-average {
+            color: var(--warning-color);
+        }
+        
+        .score-poor {
+            color: var(--danger-color);
+        }
+        
+        .question-card {
+            background-color: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .question-number {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .answer-container {
+            background-color: var(--light-color);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .feedback-container {
+            background-color: var(--success-light);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .criteria-table th {
+            width: 50%;
+        }
+        
+        .keyword-badge {
+            display: inline-block;
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            border-radius: 1rem;
+            padding: 0.25rem 0.75rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .keyword-badge.found {
+            background-color: var(--success-light);
+            color: var(--success-color);
+        }
+        
+        .keyword-badge.missing {
+            background-color: var(--warning-light);
+            color: var(--warning-color);
+        }
+        
+        .summary-card {
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .summary-card .card-header {
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            font-weight: 600;
+        }
+        
+        .chart-container {
+            height: 250px;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-graduation-cap me-2"></i>
+                <span>Grad</span>it
+                <span class="badge-student ms-2">Student</span>
+            </a>
+            <div class="ms-auto d-flex align-items-center">
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user-circle me-1"></i> {{ user.name }}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><a class="dropdown-item" href="/student/dashboard"><i class="fas fa-home me-2"></i>Dashboard</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Results Header -->
+        <div class="results-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1>{{ exam.title }} - Results</h1>
+                    <div class="d-flex align-items-center mt-2">
+                        <span class="badge bg-primary me-2">{{ exam.course.code }}</span>
+                        <span class="text-muted">
+                            <i class="fas fa-calendar me-1"></i> {{ submission.created_at.strftime('%B %d, %Y') }}
+                        </span>
+                    </div>
+                </div>
+                <div>
+                    <a href="/student/dashboard" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Overall Score Summary -->
+                <div class="card summary-card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Overall Performance</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="score-card">
+                                    <h6 class="text-muted mb-3">Overall Score</h6>
+                                    <div class="score-value {{ 'score-excellent' if submission.percentage >= 80 else 'score-good' if submission.percentage >= 70 else 'score-average' if submission.percentage >= 60 else 'score-poor' }}">
+                                        {{ "%.1f"|format(submission.percentage) }}%
+                                    </div>
+                                    <div class="mt-2">
+                                        {{ submission.earned_points }} / {{ submission.total_points }} points
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="score-card">
+                                    <h6 class="text-muted mb-3">Time Taken</h6>
+                                    <div class="score-value">
+                                        {{ (submission.time_taken / 60)|int }}
+                                    </div>
+                                    <div class="mt-2">
+                                        minutes
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="score-card">
+                                    <h6 class="text-muted mb-3">Questions</h6>
+                                    <div class="score-value">
+                                        {{ submission.answers|length }}
+                                    </div>
+                                    <div class="mt-2">
+                                        of {{ exam.questions|length }} answered
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Performance by Question -->
+                <div class="card summary-card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Performance by Question</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="questionScoreChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Detailed Question Results -->
+                <h4 class="mb-3">Detailed Feedback</h4>
+                
+                {% for question in exam.questions %}
+                <div class="question-card">
+                    <div class="question-number">Question {{ loop.index }}</div>
+                    <div class="question-text">{{ question.text }}</div>
+                    
+                    <div class="answer-container">
+                        <h6><i class="fas fa-pen me-2"></i>Your Answer:</h6>
+                        <div class="answer-text">
+                            {% if question.id in submission.answers %}
+                                {% if question.type == 'multiple_choice' %}
+                                    <strong>{{ submission.answers[question.id] }}</strong>
+                                {% else %}
+                                    {{ submission.answers[question.id]|nl2br }}
+                                {% endif %}
+                            {% else %}
+                                <em class="text-muted">No answer provided</em>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if question.id in submission.results %}
+                    {% set result = submission.results[question.id] %}
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">Score Breakdown</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="text-center mb-3">
+                                        <div class="display-4 {{ 'text-success' if result.percentage >= 80 else 'text-primary' if result.percentage >= 70 else 'text-warning' if result.percentage >= 60 else 'text-danger' }}">
+                                            {{ "%.1f"|format(result.percentage) }}%
+                                        </div>
+                                        <div>{{ result.earned_points }} / {{ result.total_possible_points }} points</div>
+                                    </div>
+                                    
+                                    <table class="table table-sm criteria-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Criteria</th>
+                                                <th>Score</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for criterion in result.criteria_results %}
+                                            <tr>
+                                                <td>{{ criterion.description }}</td>
+                                                <td>{{ "%.1f"|format(criterion.earned_points) }} / {{ criterion.possible_points }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">Keywords Analysis</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <h6 class="text-success"><i class="fas fa-check-circle me-2"></i>Found Keywords:</h6>
+                                        {% if result.keywords_found|length > 0 %}
+                                            {% for keyword in result.keywords_found %}
+                                            <span class="keyword-badge found">{{ keyword }}</span>
+                                            {% endfor %}
+                                        {% else %}
+                                            <p class="text-muted small">No keywords found in your answer.</p>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div>
+                                        <h6 class="text-warning"><i class="fas fa-exclamation-circle me-2"></i>Missing Keywords:</h6>
+                                        {% if result.keywords_missing|length > 0 %}
+                                            {% for keyword in result.keywords_missing %}
+                                            <span class="keyword-badge missing">{{ keyword }}</span>
+                                            {% endfor %}
+                                        {% else %}
+                                            <p class="text-muted small">You included all expected keywords!</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feedback-container mt-3">
+                        <h6><i class="fas fa-comment-dots me-2"></i>Feedback:</h6>
+                        <p>{{ result.feedback }}</p>
+                        
+                        <div class="mt-3">
+                            <h6>Criteria-Specific Feedback:</h6>
+                            <ul class="list-group">
+                                {% for criterion in result.criteria_results %}
+                                <li class="list-group-item">
+                                    <strong>{{ criterion.description }}:</strong> {{ criterion.feedback }}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning mt-3">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        No feedback available for this question.
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="col-md-4">
+                <!-- Overall Feedback Card -->
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0">Overall Feedback</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6>Strengths:</h6>
+                            <ul>
+                                {% if submission.percentage >= 80 %}
+                                <li>Excellent understanding of the course material</li>
+                                <li>Well-structured and comprehensive answers</li>
+                                <li>Effective use of key concepts and terminology</li>
+                                {% elif submission.percentage >= 70 %}
+                                <li>Good grasp of most course concepts</li>
+                                <li>Clear and organized responses</li>
+                                <li>Appropriate use of subject terminology</li>
+                                {% elif submission.percentage >= 60 %}
+                                <li>Satisfactory understanding of basic concepts</li>
+                                <li>Adequate responses to most questions</li>
+                                <li>Some good application of course material</li>
+                                {% else %}
+                                <li>Some understanding of fundamental concepts</li>
+                                <li>Attempted to address the questions</li>
+                                <li>Shows potential for improvement</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6>Areas for Improvement:</h6>
+                            <ul>
+                                {% if submission.percentage >= 80 %}
+                                <li>Minor refinements in specific topic areas</li>
+                                <li>Further development of critical analysis</li>
+                                {% elif submission.percentage >= 70 %}
+                                <li>Deeper exploration of complex concepts</li>
+                                <li>More thorough application of key principles</li>
+                                <li>Enhanced critical thinking in responses</li>
+                                {% elif submission.percentage >= 60 %}
+                                <li>Strengthen understanding of core concepts</li>
+                                <li>Improve depth and detail in responses</li>
+                                <li>More consistent application of terminology</li>
+                                {% else %}
+                                <li>Review fundamental course concepts</li>
+                                <li>Develop more structured responses</li>
+                                <li>Improve understanding of key terminology</li>
+                                <li>Practice applying concepts to questions</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h6>Recommended Actions:</h6>
+                            <ul>
+                                {% if submission.percentage >= 80 %}
+                                <li>Review advanced materials for deeper insights</li>
+                                <li>Consider peer discussions for alternative perspectives</li>
+                                {% elif submission.percentage >= 70 %}
+                                <li>Review lecture notes on specific topics</li>
+                                <li>Practice applying concepts to complex scenarios</li>
+                                <li>Seek clarification on challenging areas</li>
+                                {% elif submission.percentage >= 60 %}
+                                <li>Revisit course materials for key topics</li>
+                                <li>Create concept maps to connect ideas</li>
+                                <li>Form study groups for collaborative learning</li>
+                                {% else %}
+                                <li>Schedule a meeting with your instructor</li>
+                                <li>Utilize available tutoring resources</li>
+                                <li>Create flashcards for key terminology</li>
+                                <li>Develop a structured study plan</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Study Resources Card -->
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0">Recommended Resources</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Course Textbook</h6>
+                                    <small><i class="fas fa-book"></i></small>
+                                </div>
+                                <p class="mb-1">{{ exam.course.title }} - Main Textbook</p>
+                                <small class="text-muted">Chapters related to exam topics</small>
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Lecture Recordings</h6>
+                                    <small><i class="fas fa-video"></i></small>
+                                </div>
+                                <p class="mb-1">Review key lectures</p>
+                                <small class="text-muted">Available in the course portal</small>
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Practice Exercises</h6>
+                                    <small><i class="fas fa-tasks"></i></small>
+                                </div>
+                                <p class="mb-1">Additional practice questions</p>
+                                <small class="text-muted">Reinforces exam concepts</small>
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Office Hours</h6>
+                                    <small><i class="fas fa-user-tie"></i></small>
+                                </div>
+                                <p class="mb-1">Schedule a meeting with your instructor</p>
+                                <small class="text-muted">Get personalized feedback</small>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Actions Card -->
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0">Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="/student/exams/{{ exam.id }}/results/pdf" class="btn btn-primary">
+                                <i class="fas fa-download me-2"></i> Download Results PDF
+                            </a>
+                            <a href="/student/dashboard" class="btn btn-outline-secondary">
+                                <i class="fas fa-home me-2"></i> Return to Dashboard
+                            </a>
+                            {% if submission.can_request_review %}
+                            <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#requestReviewModal">
+                                <i class="fas fa-flag me-2"></i> Request Manual Review
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Request Review Modal -->
+    <div class="modal fade" id="requestReviewModal" tabindex="-1" aria-labelledby="requestReviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="requestReviewModalLabel">Request Manual Review</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>If you believe there was an error in the automated grading, you can request a manual review by your instructor.</p>
+                    <div class="mb-3">
+                        <label for="reviewReason" class="form-label">Reason for Review Request</label>
+                        <textarea class="form-control" id="reviewReason" rows="4" placeholder="Please explain why you think your answers deserve a review..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Select Questions to Review</label>
+                        {% for question in exam.questions %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="{{ question.id }}" id="question-review-{{ question.id }}">
+                            <label class="form-check-label" for="question-review-{{ question.id }}">
+                                Question {{ loop.index }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-warning" id="submit-review-request">Submit Request</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Question Score Chart
+            const ctx = document.getElementById('questionScoreChart').getContext('2d');
+            
+            const questionLabels = [
+                {% for question in exam.questions %}
+                'Q{{ loop.index }}',
+                {% endfor %}
+            ];
+            
+            const questionScores = [
+                {% for question in exam.questions %}
+                {% if question.id in submission.results %}
+                {{ (submission.results[question.id].percentage)|round(1) }},
+                {% else %}
+                0,
+                {% endif %}
+                {% endfor %}
+            ];
+            
+            const questionChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: questionLabels,
+                    datasets: [{
+                        label: 'Score (%)',
+                        data: questionScores,
+                        backgroundColor: [
+                            {% for question in exam.questions %}
+                            {% if question.id in submission.results %}
+                            {% set percentage = submission.results[question.id].percentage %}
+                            {% if percentage >= 80 %}'rgba(74, 222, 128, 0.8)'{% elif percentage >= 70 %}'rgba(67, 97, 238, 0.8)'{% elif percentage >= 60 %}'rgba(251, 191, 36, 0.8)'{% else %}'rgba(248, 113, 113, 0.8)'{% endif %},
+                            {% else %}
+                            'rgba(156, 163, 175, 0.8)',
+                            {% endif %}
+                            {% endfor %}
+                        ],
+                        borderColor: [
+                            {% for question in exam.questions %}
+                            {% if question.id in submission.results %}
+                            {% set percentage = submission.results[question.id].percentage %}
+                            {% if percentage >= 80 %}'rgba(74, 222, 128, 1)'{% elif percentage >= 70 %}'rgba(67, 97, 238, 1)'{% elif percentage >= 60 %}'rgba(251, 191, 36, 1)'{% else %}'rgba(248, 113, 113, 1)'{% endif %},
+                            {% else %}
+                            'rgba(156, 163, 175, 1)',
+                            {% endif %}
+                            {% endfor %}
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.parsed.y + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Handle review request submission
+            const submitReviewBtn = document.getElementById('submit-review-request');
+            if (submitReviewBtn) {
+                submitReviewBtn.addEventListener('click', function() {
+                    const reason = document.getElementById('reviewReason').value;
+                    if (!reason.trim()) {
+                        alert('Please provide a reason for your review request.');
+                        return;
+                    }
+                    
+                    const selectedQuestions = [];
+                    document.querySelectorAll('input[id^="question-review-"]:checked').forEach(checkbox => {
+                        selectedQuestions.push(checkbox.value);
+                    });
+                    
+                    if (selectedQuestions.length === 0) {
+                        alert('Please select at least one question to review.');
+                        return;
+                    }
+                    
+                    // Submit review request
+                    fetch('/student/exams/{{ submission.id }}/request-review', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            reason: reason,
+                            questions: selectedQuestions
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Your review request has been submitted successfully.');
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('requestReviewModal'));
+                            modal.hide();
+                        } else {
+                            alert('Error submitting review request: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while submitting your review request.');
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>

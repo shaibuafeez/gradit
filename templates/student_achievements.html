@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gradit - Achievements</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-dark: #3a56d4;
+            --primary-light: #e0e7ff;
+            --secondary-color: #7209b7;
+            --accent-color: #4cc9f0;
+            --success-color: #4ade80;
+            --success-light: #dcfce7;
+            --warning-color: #fbbf24;
+            --danger-color: #f87171;
+            --light-color: #f9fafb;
+            --dark-color: #1f2937;
+            --gray-color: #9ca3af;
+            --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        
+        body {
+            background-color: #ffffff;
+            font-family: var(--font-sans);
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+        .navbar {
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            padding: 1rem 0;
+            transition: var(--transition);
+        }
+        .sidebar {
+            min-height: calc(100vh - 56px);
+            background-color: white;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+            padding-top: 20px;
+        }
+        .sidebar .nav-link {
+            color: var(--dark-color);
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            margin-bottom: 0.25rem;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+        .sidebar .nav-link:hover {
+            color: var(--accent-color);
+            background-color: rgba(76, 201, 240, 0.05);
+        }
+        .sidebar .nav-link.active {
+            background-color: rgba(76, 201, 240, 0.15);
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+        .content {
+            padding: 20px;
+        }
+        .badge-student {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 0.35em 0.65em;
+            font-size: 0.75em;
+            font-weight: 700;
+            border-radius: 0.25rem;
+        }
+        .achievement-card {
+            background-color: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        .achievement-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .achievement-card.locked {
+            opacity: 0.7;
+            filter: grayscale(1);
+        }
+        .achievement-card.locked:hover {
+            transform: none;
+        }
+        .achievement-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 1rem;
+        }
+        .achievement-icon.gold {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
+        .achievement-icon.silver {
+            background-color: #f1f5f9;
+            color: #64748b;
+        }
+        .achievement-icon.bronze {
+            background-color: #fde68a;
+            color: #b45309;
+        }
+        .achievement-progress {
+            height: 8px;
+            border-radius: 4px;
+            margin-top: 10px;
+            background-color: #e5e7eb;
+        }
+        .achievement-progress-bar {
+            height: 100%;
+            border-radius: 4px;
+            background-color: var(--accent-color);
+        }
+        .locked-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+        }
+        .locked-icon {
+            font-size: 2rem;
+            color: var(--gray-color);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/dashboard">
+                <i class="fas fa-graduation-cap me-2"></i>
+                <span>Grad</span>it
+                <span class="badge-student ms-2">Student</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#notificationsModal">
+                            <i class="fas fa-bell me-1"></i>
+                            <span class="badge rounded-pill bg-danger">2</span>
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i> {{ user.name }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="/settings"><i class="fas fa-user-cog me-1"></i> Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logout-link"><i class="fas fa-sign-out-alt me-1"></i> Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/dashboard">
+                                <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/essay-scorer">
+                                <i class="fas fa-pencil-alt me-2"></i> My Essays
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/essay-scorer?action=submit">
+                                <i class="fas fa-file-upload me-2"></i> Submit Essay
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/progress">
+                                <i class="fas fa-chart-line me-2"></i> Progress
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/courses">
+                                <i class="fas fa-book me-2"></i> Courses
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/resources">
+                                <i class="fas fa-lightbulb me-2"></i> Resources
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/achievements">
+                                <i class="fas fa-trophy me-2"></i> Achievements
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/settings">
+                                <i class="fas fa-cog me-2"></i> Settings
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">My Achievements</h1>
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <span class="h4 mb-0 me-2">{{ achievements_unlocked|default(3) }}</span>
+                            <span class="text-muted">of {{ total_achievements|default(15) }} unlocked</span>
+                        </div>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-filter me-1"></i> Filter
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#">All Achievements</a></li>
+                                <li><a class="dropdown-item" href="#">Unlocked</a></li>
+                                <li><a class="dropdown-item" href="#">Locked</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#">Writing</a></li>
+                                <li><a class="dropdown-item" href="#">Progress</a></li>
+                                <li><a class="dropdown-item" href="#">Participation</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Achievement Stats -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <div class="display-4 mb-2 text-warning">
+                                    <i class="fas fa-trophy"></i>
+                                </div>
+                                <h5 class="card-title">{{ achievements_unlocked|default(3) }}</h5>
+                                <p class="card-text text-muted">Achievements Unlocked</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <div class="display-4 mb-2 text-primary">
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <h5 class="card-title">{{ total_points|default(250) }}</h5>
+                                <p class="card-text text-muted">Achievement Points</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <div class="display-4 mb-2 text-success">
+                                    <i class="fas fa-award"></i>
+                                </div>
+                                <h5 class="card-title">{{ next_achievement|default('Essay Master') }}</h5>
+                                <p class="card-text text-muted">Next Achievement</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <div class="display-4 mb-2 text-info">
+                                    <i class="fas fa-level-up-alt"></i>
+                                </div>
+                                <h5 class="card-title">{{ level|default('Novice') }}</h5>
+                                <p class="card-text text-muted">Current Level</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Achievements -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h3 class="h5 mb-3">Recently Unlocked</h3>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="achievement-card">
+                            <div class="achievement-icon gold">
+                                <i class="fas fa-pencil-alt"></i>
+                            </div>
+                            <h4>First Essay</h4>
+                            <p class="text-muted">Successfully submitted your first essay for grading.</p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="badge bg-warning">Writing</span>
+                                <small class="text-muted">Unlocked May 1, 2025</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="achievement-card">
+                            <div class="achievement-icon gold">
+                                <i class="fas fa-check-double"></i>
+                            </div>
+                            <h4>Perfect Grammar</h4>
+                            <p class="text-muted">Received a perfect score in grammar on an essay submission.</p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="badge bg-success">Skill</span>
+                                <small class="text-muted">Unlocked May 3, 2025</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="achievement-card">
+                            <div class="achievement-icon bronze">
+                                <i class="fas fa-book-reader"></i>
+                            </div>
+                            <h4>Resource Explorer</h4>
+                            <p class="text-muted">Accessed 5 different learning resources to improve your writing.</p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="badge bg-info">Participation</span>
+                                <small class="text-muted">Unlocked May 5, 2025</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- All Achievements -->
+                <div class="row">
+                    <div class="col-12">
+                        <h3 class="h5 mb-3">All Achievements</h3>
+                    </div>
+                    
+                    <!-- Writing Category -->
+                    <div class="col-12 mb-3">
+                        <h4 class="h6 text-uppercase text-muted">Writing</h4>
+                    </div>
+                    
+                    <div class="col-md-3 mb-4">
+                        <div class="achievement-card">
+                            <div class="achievement-icon gold">
+                                <i class="fas fa-pencil-alt"></i>
+                            </div>
+                            <h5>First Essay</h5>
+                            <p class="small text-muted">Submit your first essay</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-warning">Writing</span>
+                                <span class="badge bg-success">Completed</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 mb-4">
+                        <div class="achievement-card">
+                            <div class="achievement-icon silver">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <h5>Essay Enthusiast</h5>
+                            <p class="small text-muted">Submit 5 essays</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-warning">Writing</span>
+                                <span class="badge bg-success">Completed</span>
+                            </div>
+                            <div class="achievement-progress">
+                                <div class="achievement-progress-bar" style="width: 100%"></div>
+                            </div>
+                            <small class="text-muted">5/5 completed</small>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 mb-4">
+                        <div class="achievement-card">
+                            <div class="achievement-icon bronze">
+                                <i class="fas fa-pen-fancy"></i>
+                            </div>
+                            <h5>Essay Master</h5>
+                            <p class="small text-muted">Submit 10 essays</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-warning">Writing</span>
+                                <span class="badge bg-primary">In Progress</span>
+                            </div>
+                            <div class="achievement-progress">
+                                <div class="achievement-progress-bar" style="width: 60%"></div>
+                            </div>
+                            <small class="text-muted">6/10 completed</small>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 mb-4">
+                        <div class="achievement-card locked">
+                            <div class="locked-overlay">
+                                <i class="fas fa-lock locked-icon"></i>
+                            </div>
+                            <div class="achievement-icon">
+                                <i class="fas fa-feather-alt"></i>
+                            </div>
+                            <h5>Prolific Writer</h5>
+                            <p class="small text-muted">Submit 25 essays</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-warning">Writing</span>
+                                <span class="badge bg-secondary">Locked</span>
+                            </div>
+                            <div class="achievement-progress">
+                                <div class="achievement-progress-bar" style="width: 24%"></div>
+                            </div>
+                            <small class="text-muted">6/25 completed</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Skill Category -->
+                    <div class="col-12 mb-3">
+                        <h4 class="h6 text-uppercase text-muted">Skills</h4>
+                    </div>
+                    
+                    <div class="col-md-3 mb-4">
+                        <div class="achievement-card">
+                            <div class="achievement-icon gold">
+                                <i class="fas fa-check-double"></i>
+                            </div>
+                            <h5>Perfect Grammar</h5>
+                            <p class="small text-muted">Get perfect grammar score</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-success">Skill</span>
+                                <span class="badge bg-success">Completed</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 mb-4">
+                        <div class="achievement-card locked">
+                            <div class="locked-overlay">
+                                <i class="fas fa-lock locked-icon"></i>
+                            </div>
+                            <div class="achievement-icon">
+                                <i class="fas fa-sitemap"></i>
+                            </div>
+                            <h5>Structure Expert</h5>
+                            <p class="small text-muted">Get perfect structure score</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-success">Skill</span>
+                                <span class="badge bg-secondary">Locked</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 mb-4">
+                        <div class="achievement-card locked">
+                            <div class="locked-overlay">
+                                <i class="fas fa-lock locked-icon"></i>
+                            </div>
+                            <div class="achievement-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <h5>Critical Thinker</h5>
+                            <p class="small text-muted">Get perfect content score</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-success">Skill</span>
+                                <span class="badge bg-secondary">Locked</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 mb-4">
+                        <div class="achievement-card locked">
+                            <div class="locked-overlay">
+                                <i class="fas fa-lock locked-icon"></i>
+                            </div>
+                            <div class="achievement-icon">
+                                <i class="fas fa-award"></i>
+                            </div>
+                            <h5>Perfect Essay</h5>
+                            <p class="small text-muted">Get a perfect score on an essay</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-success">Skill</span>
+                                <span class="badge bg-secondary">Locked</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Participation Category -->
+                    <div class="col-12 mb-3">
+                        <h4 class="h6 text-uppercase text-muted">Participation</h4>
+                    </div>
+                    
+                    <div class="col-md-3 mb-4">
+                        <div class="achievement-card">
+                            <div class="achievement-icon bronze">
+                                <i class="fas fa-book-reader"></i>
+                            </div>
+                            <h5>Resource Explorer</h5>
+                            <p class="small text-muted">Access 5 learning resources</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-info">Participation</span>
+                                <span class="badge bg-success">Completed</span>
+                            </div>
+                            <div class="achievement-progress">
+                                <div class="achievement-progress-bar" style="width: 100%"></div>
+                            </div>
+                            <small class="text-muted">5/5 completed</small>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 mb-4">
+                        <div class="achievement-card locked">
+                            <div class="locked-overlay">
+                                <i class="fas fa-lock locked-icon"></i>
+                            </div>
+                            <div class="achievement-icon">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <h5>Consistent Learner</h5>
+                            <p class="small text-muted">Log in for 7 consecutive days</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-info">Participation</span>
+                                <span class="badge bg-secondary">Locked</span>
+                            </div>
+                            <div class="achievement-progress">
+                                <div class="achievement-progress-bar" style="width: 43%"></div>
+                            </div>
+                            <small class="text-muted">3/7 days</small>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Notifications Modal -->
+    <div class="modal fade" id="notificationsModal" tabindex="-1" aria-labelledby="notificationsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="notificationsModalLabel">Notifications</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="list-group">
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Achievement Unlocked!</h6>
+                                <small>Just now</small>
+                            </div>
+                            <p class="mb-1">You've unlocked the "Resource Explorer" achievement!</p>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Almost There!</h6>
+                                <small>2 days ago</small>
+                            </div>
+                            <p class="mb-1">You're 4 essays away from unlocking "Essay Master"</p>
+                        </a>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Mark All as Read</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+</body>
+</html>

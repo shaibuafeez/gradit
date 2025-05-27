@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gradit - Automated Essay Scoring System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login-modal.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="has-navbar-fixed-top">
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-graduation-cap me-2"></i>
+                <span>Grad</span>it
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#marking-guide"><i class="fas fa-clipboard-list me-1"></i> Marking Guide</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about"><i class="fas fa-info-circle me-1"></i> About</a>
+                    </li>
+                    <li class="nav-item" id="login-nav-item">
+                        <button class="btn btn-outline-primary ms-2" data-bs-toggle="modal" data-bs-target="#loginModal">
+                            <i class="fas fa-sign-in-alt me-1"></i> Login
+                        </button>
+                    </li>
+                    <li class="nav-item" id="register-nav-item">
+                        <button class="btn btn-primary ms-2" data-bs-toggle="modal" data-bs-target="#registerModal">
+                            <i class="fas fa-user-plus me-1"></i> Register
+                        </button>
+                    </li>
+                    <li class="nav-item dropdown" id="user-dropdown" style="display: none;">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i> <span id="username-display">User</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" id="dashboard-link"><i class="fas fa-tachometer-alt me-1"></i> Dashboard</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logout-link"><i class="fas fa-sign-out-alt me-1"></i> Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <span class="badge bg-primary-light text-primary mb-3">AI-Powered Essay Evaluation</span>
+                    <h1 class="display-4 fw-bold mb-4">Transform Your <span class="text-gradient">Writing</span> With Instant Feedback</h1>
+                    <p class="lead mb-5">
+                        Get detailed, AI-powered feedback on your essays in seconds. Our system uses state-of-the-art transformer models to evaluate writing quality, organization, and content—helping you improve with every draft.                        
+                    </p>
+                    <div class="d-flex gap-3 mb-5">
+                        <a href="#score-essay" class="btn btn-primary btn-lg">
+                            <i class="fas fa-pencil-alt me-2"></i>Score Your Essay
+                        </a>
+                        <a href="#about" class="btn btn-outline-dark btn-lg">
+                            <i class="fas fa-info-circle me-2"></i>Learn More
+                        </a>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="d-flex">
+                            <div class="avatar-stack">
+                                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User" class="avatar">
+                                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User" class="avatar">
+                                <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="User" class="avatar">
+                            </div>
+                        </div>
+                        <div class="ms-3">
+                            <p class="mb-0"><strong>Trusted by educators</strong></p>
+                            <div class="text-muted">Join thousands of teachers and students</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 d-none d-lg-block position-relative mt-5 mt-lg-0">
+                    <div class="hero-image-container">
+                        <img src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1073&q=80" 
+                             alt="Essay Writing" class="img-fluid rounded-lg hero-image">
+                        <div class="floating-card card-score">
+                            <div class="icon-circle bg-success-light text-success">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div>Essay Score</div>
+                            <div class="score">9.2<span>/10</span></div>
+                        </div>
+                        <div class="floating-card card-feedback">
+                            <div class="icon-circle bg-primary-light text-primary">
+                                <i class="fas fa-comment-dots"></i>
+                            </div>
+                            <div>Smart Feedback</div>
+                            <div class="feedback-pills">
+                                <span class="badge rounded-pill bg-light text-dark">Structure</span>
+                                <span class="badge rounded-pill bg-light text-dark">Clarity</span>
+                                <span class="badge rounded-pill bg-light text-dark">Evidence</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="hero-shape-bottom">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="#ffffff" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,133.3C672,139,768,181,864,197.3C960,213,1056,203,1152,176C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>
+        </div>
+    </div>
+
+    <section id="marking-guide" class="py-5 section-padding bg-light">
+        <div class="container">
+            <div class="row justify-content-center mb-5">
+                <div class="col-lg-8 text-center">
+                    <span class="badge bg-primary-light text-primary mb-3">Teacher Resources</span>
+                    <h2 class="section-title mb-3">Create Your Marking Guide</h2>
+                    <p class="section-subtitle">Define custom criteria and expectations to help the AI better understand how to evaluate your students' essays</p>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="card marking-card">
+                        <div class="card-body p-0">
+                            <div class="row g-0">
+                                <div class="col-lg-5 marking-form-sidebar">
+                                    <div class="p-4 p-lg-5">
+                                        <h3 class="mb-4"><i class="fas fa-clipboard-list me-2"></i>Marking Criteria</h3>
+                                        <form id="marking-form">
+                                            <div class="mb-4">
+                                                <label for="assignment-name" class="form-label">Assignment Name</label>
+                                                <input type="text" class="form-control" id="assignment-name" 
+                                                       placeholder="e.g., Persuasive Essay on Climate Change" required>
+                                            </div>
+                                            
+                                            <div class="mb-4">
+                                                <label for="grade-level" class="form-label">Grade Level</label>
+                                                <select class="form-select" id="grade-level" required>
+                                                    <option value="" selected disabled>Select grade level</option>
+                                                    <option value="6">Grade 6</option>
+                                                    <option value="7">Grade 7</option>
+                                                    <option value="8">Grade 8</option>
+                                                    <option value="9">Grade 9</option>
+                                                    <option value="10">Grade 10</option>
+                                                    <option value="11">Grade 11</option>
+                                                    <option value="12">Grade 12</option>
+                                                    <option value="college">College/University</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <div class="mb-4">
+                                                <label for="essay-prompt" class="form-label">Essay Prompt</label>
+                                                <textarea class="form-control" id="essay-prompt" rows="3" 
+                                                          placeholder="Enter the exact prompt given to students..." required></textarea>
+                                                <div class="form-text mt-2">
+                                                    <i class="fas fa-info-circle me-1"></i> This helps the AI understand what students were asked to write about.
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="criteria-section mb-4">
+                                                <label class="form-label d-flex justify-content-between align-items-center">
+                                                    <span>Scoring Criteria</span>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary" id="add-criteria-btn">
+                                                        <i class="fas fa-plus me-1"></i>Add Criteria
+                                                    </button>
+                                                </label>
+                                                
+                                                <div id="criteria-container">
+                                                    <div class="criteria-item card mb-3">
+                                                        <div class="card-body">
+                                                            <div class="d-flex justify-content-between mb-2">
+                                                                <h6 class="mb-0">Criteria 1</h6>
+                                                                <button type="button" class="btn-close criteria-remove" aria-label="Remove"></button>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label class="form-label small">Name</label>
+                                                                <input type="text" class="form-control criteria-name" 
+                                                                       placeholder="e.g., Content & Organization" required>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label class="form-label small">Description</label>
+                                                                <textarea class="form-control criteria-desc" rows="2" 
+                                                                          placeholder="Describe what you're looking for..." required></textarea>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-6">
+                                                                    <label class="form-label small">Weight (%)</label>
+                                                                    <input type="number" class="form-control criteria-weight" 
+                                                                           value="25" min="5" max="100" required>
+                                                                </div>
+                                                                <div class="col-6">
+                                                                    <label class="form-label small">Max Points</label>
+                                                                    <input type="number" class="form-control criteria-points" 
+                                                                           value="10" min="1" max="100" required>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mb-4">
+                                                <label for="exemplar-essay" class="form-label">Exemplar Essay (Optional)</label>
+                                                <textarea class="form-control" id="exemplar-essay" rows="4" 
+                                                          placeholder="Paste a high-quality example essay here..."></textarea>
+                                                <div class="form-text mt-2">
+                                                    <i class="fas fa-info-circle me-1"></i> Providing an exemplar helps the AI understand your expectations.
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="d-grid">
+                                                <button type="submit" class="btn btn-primary btn-lg" id="save-marking-guide-btn">
+                                                    <i class="fas fa-save me-2"></i>Save Marking Guide
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="col-lg-7 marking-preview-section">
+                                    <div id="marking-placeholder" class="text-center p-5 h-100 d-flex flex-column justify-content-center align-items-center">
+                                        <div class="placeholder-icon mb-4">
+                                            <i class="fas fa-file-alt"></i>
+                                        </div>
+                                        <h4>Marking Guide Preview</h4>
+                                        <p class="text-muted">Create your marking guide to see a preview of how it will be used to evaluate essays</p>
+                                    </div>
+                                    
+                                    <div id="marking-preview" class="p-4 p-lg-5 d-none">
+                                        <div class="d-flex justify-content-between align-items-center mb-4">
+                                            <h3 class="mb-0">Guide Preview</h3>
+                                            <div class="badge bg-success-light text-success px-3 py-2">
+                                                <i class="fas fa-check-circle me-1"></i> Ready to Use
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="guide-preview-container mb-4">
+                                            <div class="guide-header mb-3">
+                                                <h5 id="preview-assignment-name">Assignment Name</h5>
+                                                <div class="text-muted mb-2" id="preview-grade-level">Grade Level</div>
+                                                <div class="prompt-container p-3 mb-3 bg-light rounded">
+                                                    <div class="small fw-bold mb-1">Prompt:</div>
+                                                    <div id="preview-prompt">Essay prompt will appear here...</div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="criteria-preview mb-4">
+                                                <h5 class="mb-3">Scoring Criteria</h5>
+                                                <div id="preview-criteria-list">
+                                                    <!-- Criteria will be dynamically added here -->
+                                                    <div class="criteria-preview-item mb-3">
+                                                        <div class="d-flex justify-content-between">
+                                                            <div>
+                                                                <h6>Content & Organization</h6>
+                                                                <p class="small text-muted">Clear thesis, well-structured paragraphs, logical flow of ideas</p>
+                                                            </div>
+                                                            <div class="text-end">
+                                                                <div class="fw-bold">10 points</div>
+                                                                <div class="small text-muted">25% of total</div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="progress">
+                                                            <div class="progress-bar bg-primary" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="total-score-preview p-3 bg-light rounded">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <h5 class="mb-0">Total Possible Score:</h5>
+                                                    <div class="total-score-badge" id="preview-total-points">40</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-between">
+                                            <button type="button" class="btn btn-outline-primary" id="edit-guide-btn">
+                                                <i class="fas fa-edit me-2"></i>Edit Guide
+                                            </button>
+                                            <button type="button" class="btn btn-success" id="apply-guide-btn">
+                                                <i class="fas fa-check-circle me-2"></i>Apply to Scoring
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="marking-saved" class="p-4 p-lg-5 d-none">
+                                        <div class="text-center">
+                                            <div class="success-icon mb-4">
+                                                <i class="fas fa-check-circle"></i>
+                                            </div>
+                                            <h3 class="mb-3">Marking Guide Saved!</h3>
+                                            <p class="mb-4">Your marking guide has been successfully saved and will be used to evaluate essays.</p>
+                                            <div class="d-grid">
+                                                <a href="#score-essay" class="btn btn-primary btn-lg">
+                                                    <i class="fas fa-pencil-alt me-2"></i>Score Essays Now
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="py-5 section-padding">
+        <div class="container">
+            <div class="row justify-content-center mb-5">
+                <div class="col-lg-8 text-center">
+                    <span class="badge bg-primary-light text-primary mb-3">About Our System</span>
+                    <h2 class="section-title mb-3">Powered by Advanced AI</h2>
+                    <p class="section-subtitle">Learn how our state-of-the-art automated essay scoring system works to provide accurate and helpful feedback</p>
+                </div>
+            </div>
+            
+            <div class="row justify-content-center g-4">
+                <div class="col-lg-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <h3>How It Works</h3>
+                        <p>
+                            Our Automated Essay Scoring (AES) system uses state-of-the-art transformer models
+                            to evaluate essays based on content, organization, language use, and mechanics.
+                        </p>
+                        <div class="feature-list">
+                            <div class="feature-item">
+                                <div class="feature-check"><i class="fas fa-check"></i></div>
+                                <div>Advanced text preprocessing with NLP techniques</div>
+                            </div>
+                            <div class="feature-item">
+                                <div class="feature-check"><i class="fas fa-check"></i></div>
+                                <div>Transformer-based embeddings for deep understanding</div>
+                            </div>
+                            <div class="feature-item">
+                                <div class="feature-check"><i class="fas fa-check"></i></div>
+                                <div>Neural network scoring with high accuracy</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="feature-card active">
+                        <div class="feature-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h3>AI Technology</h3>
+                        <p>
+                            The system extracts meaningful features from essays using RoBERTa, a powerful
+                            language model, and then uses a neural network to predict scores that correlate
+                            highly with human ratings.
+                        </p>
+                        <div class="tech-stack">
+                            <div class="tech-badge">PyTorch</div>
+                            <div class="tech-badge">RoBERTa</div>
+                            <div class="tech-badge">Transformers</div>
+                            <div class="tech-badge">NLTK</div>
+                            <div class="tech-badge">spaCy</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3>Performance</h3>
+                        <p>
+                            Our system achieves high correlation with human graders, using Quadratic Weighted Kappa (QWK) 
+                            as the primary evaluation metric to ensure accurate and fair scoring.
+                        </p>
+                        <div class="performance-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">0.80+</div>
+                                <div class="stat-label">QWK Score</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">125M</div>
+                                <div class="stat-label">Model Parameters</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">8</div>
+                                <div class="stat-label">Essay Sets Supported</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row justify-content-center mt-5">
+                <div class="col-lg-10">
+                    <div class="architecture-card">
+                        <div class="row align-items-center">
+                            <div class="col-lg-5">
+                                <h3 class="mb-4">System Architecture</h3>
+                                <p class="mb-4">
+                                    Our AES system uses a sophisticated architecture that combines transformer models with 
+                                    neural networks to achieve human-level essay scoring performance.
+                                </p>
+                                <div class="architecture-layers">
+                                    <div class="layer-item">
+                                        <div class="layer-icon"><i class="fas fa-file-alt"></i></div>
+                                        <div class="layer-content">
+                                            <h6>Text Preprocessing</h6>
+                                            <p>Tokenization, lemmatization, and special character handling</p>
+                                        </div>
+                                    </div>
+                                    <div class="layer-item">
+                                        <div class="layer-icon"><i class="fas fa-project-diagram"></i></div>
+                                        <div class="layer-content">
+                                            <h6>RoBERTa Embedding</h6>
+                                            <p>Contextual word embeddings from transformer model</p>
+                                        </div>
+                                    </div>
+                                    <div class="layer-item">
+                                        <div class="layer-icon"><i class="fas fa-network-wired"></i></div>
+                                        <div class="layer-content">
+                                            <h6>MLP Scoring</h6>
+                                            <p>Multi-layer perceptron with batch normalization</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-7">
+                                <div class="architecture-image">
+                                    <img src="https://miro.medium.com/max/1400/1*3LnrqWvOh6-Xt5I-GXJi0A.png" alt="Neural Network Architecture" class="img-fluid rounded-lg">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer-section">
+        <div class="container">
+            <div class="footer-content">
+                <div class="row">
+                    <div class="col-lg-4 col-md-6 mb-4 mb-md-0">
+                        <div class="footer-brand">
+                            <i class="fas fa-graduation-cap me-2"></i>
+                            <span>Essay</span>Scorer
+                        </div>
+                        <p class="footer-desc">
+                            A modern AI-powered essay scoring system that provides instant, detailed feedback to help improve writing skills.
+                        </p>
+                        <div class="social-links">
+                            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-6 mb-4 mb-md-0">
+                        <h5 class="footer-heading">Features</h5>
+                        <ul class="footer-links">
+                            <li><a href="#score-essay">Essay Scoring</a></li>
+                            <li><a href="#marking-guide">Marking Guide</a></li>
+                            <li><a href="#about">AI Technology</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-2 col-md-6 mb-4 mb-md-0">
+                        <h5 class="footer-heading">Resources</h5>
+                        <ul class="footer-links">
+                            <li><a href="#">Documentation</a></li>
+                            <li><a href="#">API Reference</a></li>
+                            <li><a href="#">GitHub Repo</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <h5 class="footer-heading">Stay Updated</h5>
+                        <p class="mb-3">Subscribe to our newsletter for the latest updates and features.</p>
+                        <div class="newsletter-form">
+                            <div class="input-group">
+                                <input type="email" class="form-control" placeholder="Your email address" aria-label="Email address">
+                                <button class="btn btn-primary" type="button">Subscribe</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <p class="copyright mb-0">&copy; 2025 EssayScorer. All rights reserved.</p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <div class="footer-bottom-links">
+                            <a href="#">Privacy Policy</a>
+                            <a href="#">Terms of Service</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title" id="loginModalLabel">Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-0">
+                    <div class="alert alert-danger" id="login-error" style="display: none;"></div>
+                    <form id="login-form">
+                        <div class="mb-3">
+                            <label for="login-email" class="form-label fw-medium">Email address</label>
+                            <input type="email" class="form-control" id="login-email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="login-password" class="form-label fw-medium">Password</label>
+                            <input type="password" class="form-control" id="login-password" required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary login-btn fw-medium">Login</button>
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-3 mb-3">
+                        <p class="small">Don't have an account? <a href="#" data-bs-toggle="modal" data-bs-target="#registerModal" data-bs-dismiss="modal">Register here</a></p>
+                    </div>
+                    
+                    <div class="demo-credentials bg-light p-3 rounded">
+                        <h6 class="mb-2">Demo Accounts</h6>
+                        
+                        <div class="demo-account" id="student-demo-btn">
+                            <div class="demo-account-icon bg-light-blue rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                                <i class="fas fa-user-graduate text-primary"></i>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="mb-1 fw-medium">Student</h6>
+                                <p class="small text-muted mb-0">student@example.com</p>
+                            </div>
+                        </div>
+                        
+                        <div class="demo-account mt-2" id="teacher-demo-btn">
+                            <div class="demo-account-icon bg-light-blue rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                                <i class="fas fa-chalkboard-teacher text-primary"></i>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="mb-1 fw-medium">Teacher</h6>
+                                <p class="small text-muted mb-0">teacher@example.com</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Registration Modal -->
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="registerModalLabel">Register</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger" id="register-error" style="display: none;"></div>
+                    <form id="register-form">
+                        <div class="mb-3">
+                            <label for="register-name" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="register-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="register-email" class="form-label">Email address</label>
+                            <input type="email" class="form-control" id="register-email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="register-password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="register-password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="register-role" class="form-label">Role</label>
+                            <select class="form-select" id="register-role" required>
+                                <option value="student">Student</option>
+                                <option value="teacher">Teacher</option>
+                            </select>
+                        </div>
+                        <div class="mb-3" id="matric-number-group">
+                            <label for="register-matric" class="form-label">Matric Number</label>
+                            <input type="text" class="form-control" id="register-matric">
+                            <div class="form-text">Required for students only</div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Register</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Dashboard Modal -->
+    <div class="modal fade" id="dashboardModal" tabindex="-1" aria-labelledby="dashboardModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="dashboardModalLabel">Dashboard</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs" id="dashboardTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="courses-tab" data-bs-toggle="tab" data-bs-target="#courses" type="button" role="tab">Courses</button>
+                        </li>
+                        <li class="nav-item" role="presentation" id="questions-tab-item" style="display: none;">
+                            <button class="nav-link" id="questions-tab" data-bs-toggle="tab" data-bs-target="#questions" type="button" role="tab">Questions</button>
+                        </li>
+                        <li class="nav-item" role="presentation" id="exams-tab-item" style="display: none;">
+                            <button class="nav-link" id="exams-tab" data-bs-toggle="tab" data-bs-target="#exams" type="button" role="tab">Exams</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content p-3" id="dashboardTabContent">
+                        <!-- Courses Tab -->
+                        <div class="tab-pane fade show active" id="courses" role="tabpanel">
+                            <div id="teacher-courses-controls" style="display: none;">
+                                <button class="btn btn-primary mb-3" id="add-course-btn">
+                                    <i class="fas fa-plus me-1"></i> Add New Course
+                                </button>
+                            </div>
+                            <div class="row" id="courses-container">
+                                <div class="col-12 text-center py-5">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Questions Tab -->
+                        <div class="tab-pane fade" id="questions" role="tabpanel">
+                            <div id="teacher-questions-controls" style="display: none;">
+                                <button class="btn btn-primary mb-3" id="add-question-btn">
+                                    <i class="fas fa-plus me-1"></i> Add New Question
+                                </button>
+                            </div>
+                            <div id="questions-container">
+                                <div class="text-center py-3">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Exams Tab -->
+                        <div class="tab-pane fade" id="exams" role="tabpanel">
+                            <div id="teacher-exams-controls" style="display: none;">
+                                <button class="btn btn-primary mb-3" id="create-exam-btn">
+                                    <i class="fas fa-plus me-1"></i> Create New Exam
+                                </button>
+                            </div>
+                            <div id="exams-container">
+                                <div class="text-center py-5">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Course Modal -->
+    <div class="modal fade" id="addCourseModal" tabindex="-1" aria-labelledby="addCourseModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addCourseModalLabel">Add New Course</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger" id="add-course-error" style="display: none;"></div>
+                    <form id="add-course-form">
+                        <div class="mb-3">
+                            <label for="course-code" class="form-label">Course Code</label>
+                            <input type="text" class="form-control" id="course-code" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="course-title" class="form-label">Course Title</label>
+                            <input type="text" class="form-control" id="course-title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="course-description" class="form-label">Description</label>
+                            <textarea class="form-control" id="course-description" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="course-units" class="form-label">Units</label>
+                            <select class="form-select" id="course-units" required>
+                                <option value="2">2 Units</option>
+                                <option value="3">3 Units</option>
+                            </select>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Create Course</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Question Modal -->
+    <div class="modal fade" id="addQuestionModal" tabindex="-1" aria-labelledby="addQuestionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addQuestionModalLabel">Add New Question</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger" id="add-question-error" style="display: none;"></div>
+                    <form id="add-question-form">
+                        <input type="hidden" id="question-course-id">
+                        <input type="hidden" id="question-parent-id">
+                        <div class="mb-3">
+                            <label for="question-text" class="form-label">Question Text</label>
+                            <textarea class="form-control" id="question-text" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="question-marking-guide" class="form-label">Marking Guide (Correct Answer)</label>
+                            <textarea class="form-control" id="question-marking-guide" rows="5" required></textarea>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Save Question</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Exam Modal -->
+    <div class="modal fade" id="createExamModal" tabindex="-1" aria-labelledby="createExamModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createExamModalLabel">Create New Exam</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger" id="create-exam-error" style="display: none;"></div>
+                    <form id="create-exam-form">
+                        <input type="hidden" id="exam-course-id">
+                        <div class="mb-3">
+                            <label for="exam-title" class="form-label">Exam Title</label>
+                            <input type="text" class="form-control" id="exam-title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="exam-description" class="form-label">Description</label>
+                            <textarea class="form-control" id="exam-description" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="exam-duration" class="form-label">Duration (minutes)</label>
+                            <input type="number" class="form-control" id="exam-duration" min="15" value="60" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Select Questions</label>
+                            <div class="border p-3 rounded" style="max-height: 300px; overflow-y: auto;">
+                                <div id="exam-questions-container">
+                                    <div class="text-center py-3">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="exam-active">
+                            <label class="form-check-label" for="exam-active">Make exam active immediately</label>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Create Exam</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Take Exam Modal -->
+    <div class="modal fade" id="takeExamModal" tabindex="-1" aria-labelledby="takeExamModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="takeExamModalLabel">Exam</h5>
+                    <div class="ms-auto">
+                        <div class="timer-display">
+                            Time Remaining: <span id="exam-timer">00:00:00</span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close ms-2" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info" id="exam-instructions">
+                        <h5><i class="fas fa-info-circle me-2"></i>Instructions</h5>
+                        <p id="exam-instruction-text">Please answer the required number of questions within the time limit.</p>
+                    </div>
+                    <form id="take-exam-form">
+                        <input type="hidden" id="exam-submission-id">
+                        <div id="exam-questions">
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">Submit Exam Answers</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exam Results Modal -->
+    <div class="modal fade" id="examResultsModal" tabindex="-1" aria-labelledby="examResultsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="examResultsModalLabel">Exam Results</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <h3>Your Overall Grade</h3>
+                        <div class="display-1 fw-bold text-primary" id="overall-grade">0%</div>
+                    </div>
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Individual Question Scores</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="question-scores-container">
+                                <!-- Question scores will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-info">
+                        <p><i class="fas fa-info-circle me-2"></i> Your answers have been submitted and auto-graded. Your instructor will review your submission and may adjust grades if needed.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Check for login error and show login modal -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check URL parameters for login_error
+            const urlParams = new URLSearchParams(window.location.search);
+            const loginError = urlParams.get('login_error');
+            
+            if (loginError) {
+                // Show login error message
+                const errorElement = document.getElementById('login-error');
+                if (errorElement) {
+                    errorElement.textContent = loginError;
+                    errorElement.style.display = 'block';
+                }
+                
+                // Show login modal
+                const loginModal = document.getElementById('loginModal');
+                if (loginModal) {
+                    const modal = new bootstrap.Modal(loginModal);
+                    modal.show();
+                }
+                
+                // Clean up the URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        });
+    </script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/marking-guide.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/exam.js') }}"></script>
+</body>
+</html>

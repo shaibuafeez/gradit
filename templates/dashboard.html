@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gradit - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar {
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar {
+            min-height: calc(100vh - 56px);
+            background-color: white;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+            padding-top: 20px;
+        }
+        .sidebar .nav-link {
+            color: #495057;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            margin-bottom: 0.25rem;
+        }
+        .sidebar .nav-link:hover {
+            background-color: #f8f9fa;
+        }
+        .sidebar .nav-link.active {
+            background-color: #e9ecef;
+            font-weight: 500;
+        }
+        .content {
+            padding: 20px;
+        }
+        .welcome-card {
+            background-color: #4361ee;
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .stats-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .stats-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .stats-value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .stats-label {
+            color: #6c757d;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-graduation-cap me-2"></i>
+                <span>Grad</span>it
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i> {{ user.name }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-user-cog me-1"></i> Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt me-1"></i> Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#">
+                                <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/essay-scorer">
+                                <i class="fas fa-pen me-2"></i> Essay Scorer
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="fas fa-book me-2"></i> Courses
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="fas fa-file-alt me-2"></i> Exams
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="fas fa-pencil-alt me-2"></i> Essays
+                            </a>
+                        </li>
+                        {% if user.role == 'teacher' %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="fas fa-users me-2"></i> Students
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="fas fa-clipboard-list me-2"></i> Marking Guide
+                            </a>
+                        </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="fas fa-chart-line me-2"></i> Progress
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="fas fa-cog me-2"></i> Settings
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 content">
+                <div class="welcome-card">
+                    <h2>Welcome, {{ user.name }}!</h2>
+                    <p>You are logged in as a {{ user.role }}. Here's your dashboard overview.</p>
+                    <a href="/essay-scorer" class="btn btn-light mt-2">
+                        <i class="fas fa-pen me-2"></i> Grade Essays Now
+                    </a>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="stats-card text-center">
+                            <div class="stats-icon text-primary">
+                                <i class="fas fa-book"></i>
+                            </div>
+                            <div class="stats-value">3</div>
+                            <div class="stats-label">Courses</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stats-card text-center">
+                            <div class="stats-icon text-success">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <div class="stats-value">12</div>
+                            <div class="stats-label">Exams</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stats-card text-center">
+                            <div class="stats-icon text-info">
+                                <i class="fas fa-pencil-alt"></i>
+                            </div>
+                            <div class="stats-value">25</div>
+                            <div class="stats-label">Essays</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Recent Courses</h5>
+                                <a href="#" class="btn btn-sm btn-primary">View All</a>
+                            </div>
+                            <div class="card-body">
+                                <div class="list-group">
+                                    <a href="#" class="list-group-item list-group-item-action">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">English Composition</h6>
+                                            <small class="text-muted">ENG101</small>
+                                        </div>
+                                        <p class="mb-1">Learn the fundamentals of essay writing</p>
+                                    </a>
+                                    <a href="#" class="list-group-item list-group-item-action">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">Advanced Writing</h6>
+                                            <small class="text-muted">ENG201</small>
+                                        </div>
+                                        <p class="mb-1">Develop advanced writing techniques</p>
+                                    </a>
+                                    <a href="#" class="list-group-item list-group-item-action">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">Research Methods</h6>
+                                            <small class="text-muted">RES301</small>
+                                        </div>
+                                        <p class="mb-1">Learn how to write research papers</p>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Upcoming Exams</h5>
+                                <a href="#" class="btn btn-sm btn-primary">View All</a>
+                            </div>
+                            <div class="card-body">
+                                <div class="list-group">
+                                    <a href="#" class="list-group-item list-group-item-action">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">Midterm Essay</h6>
+                                            <small class="text-danger">Tomorrow</small>
+                                        </div>
+                                        <p class="mb-1">English Composition (ENG101)</p>
+                                        <small class="text-muted">Duration: 60 minutes</small>
+                                    </a>
+                                    <a href="#" class="list-group-item list-group-item-action">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">Research Proposal</h6>
+                                            <small class="text-warning">3 days</small>
+                                        </div>
+                                        <p class="mb-1">Research Methods (RES301)</p>
+                                        <small class="text-muted">Duration: 90 minutes</small>
+                                    </a>
+                                    <a href="#" class="list-group-item list-group-item-action">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">Final Essay</h6>
+                                            <small class="text-muted">2 weeks</small>
+                                        </div>
+                                        <p class="mb-1">Advanced Writing (ENG201)</p>
+                                        <small class="text-muted">Duration: 120 minutes</small>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

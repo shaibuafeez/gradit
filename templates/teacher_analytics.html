@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gradit - Teacher Analytics</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-dark: #3a56d4;
+            --primary-light: #e0e7ff;
+            --secondary-color: #7209b7;
+            --accent-color: #4cc9f0;
+            --success-color: #4ade80;
+            --success-light: #dcfce7;
+            --warning-color: #fbbf24;
+            --danger-color: #f87171;
+            --light-color: #f9fafb;
+            --dark-color: #1f2937;
+            --gray-color: #9ca3af;
+            --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        
+        body {
+            background-color: #ffffff;
+            font-family: var(--font-sans);
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+        .navbar {
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            padding: 1rem 0;
+            transition: var(--transition);
+        }
+        .sidebar {
+            min-height: calc(100vh - 56px);
+            background-color: white;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+            padding-top: 20px;
+        }
+        .sidebar .nav-link {
+            color: var(--dark-color);
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            margin-bottom: 0.25rem;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+        .sidebar .nav-link:hover {
+            color: var(--accent-color);
+            background-color: rgba(76, 201, 240, 0.05);
+        }
+        .sidebar .nav-link.active {
+            background-color: rgba(76, 201, 240, 0.15);
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+        .content {
+            padding: 20px;
+        }
+        .chart-container {
+            height: 250px;
+            margin-bottom: 20px;
+        }
+        .badge-teacher {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.35em 0.65em;
+            font-size: 0.75em;
+            font-weight: 700;
+            border-radius: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/dashboard">
+                <i class="fas fa-graduation-cap me-2"></i>
+                <span>Grad</span>it
+                <span class="badge-teacher ms-2">Teacher</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#notificationsModal">
+                            <i class="fas fa-bell me-1"></i>
+                            <span class="badge rounded-pill bg-danger">3</span>
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i> {{ user.name }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="/settings"><i class="fas fa-user-cog me-1"></i> Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logout-link"><i class="fas fa-sign-out-alt me-1"></i> Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/dashboard">
+                                <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/essay-scorer">
+                                <i class="fas fa-pen-fancy me-2"></i> Score Essays
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/students">
+                                <i class="fas fa-users me-2"></i> Students
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/#marking-guide">
+                                <i class="fas fa-clipboard-list me-2"></i> Marking Guide
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/analytics">
+                                <i class="fas fa-chart-line me-2"></i> Analytics
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/courses">
+                                <i class="fas fa-book me-2"></i> Courses
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/schedule">
+                                <i class="fas fa-calendar-alt me-2"></i> Schedule
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/settings">
+                                <i class="fas fa-cog me-2"></i> Settings
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Analytics Dashboard</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-download me-1"></i> Export
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-calendar-alt me-1"></i> This Month
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Course Selection -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="course-select" class="form-label">Select Course</label>
+                            <select class="form-select" id="course-select">
+                                <option value="all" selected>All Courses</option>
+                                <option value="eng201">ENG201 - Advanced Essay Writing</option>
+                                <option value="eng101">ENG101 - Introduction to Writing</option>
+                                <option value="lit305">LIT305 - Creative Writing</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="date-range" class="form-label">Date Range</label>
+                            <select class="form-select" id="date-range">
+                                <option value="last-month">Last Month</option>
+                                <option value="last-3-months" selected>Last 3 Months</option>
+                                <option value="last-6-months">Last 6 Months</option>
+                                <option value="last-year">Last Year</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="metric-select" class="form-label">Primary Metric</label>
+                            <select class="form-select" id="metric-select">
+                                <option value="scores" selected>Essay Scores</option>
+                                <option value="submissions">Submission Rate</option>
+                                <option value="improvement">Improvement Rate</option>
+                                <option value="engagement">Student Engagement</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Performance Overview -->
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card mb-4">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Performance Overview</h5>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button type="button" class="btn btn-outline-primary active">Line</button>
+                                    <button type="button" class="btn btn-outline-primary">Bar</button>
+                                    <button type="button" class="btn btn-outline-primary">Area</button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="performanceChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Key Metrics -->
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card mb-4">
+                            <div class="card-body text-center">
+                                <div class="display-4 text-primary mb-2">78.5</div>
+                                <h5>Average Score</h5>
+                                <div class="text-success small"><i class="fas fa-arrow-up me-1"></i> 3.2% from last period</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card mb-4">
+                            <div class="card-body text-center">
+                                <div class="display-4 text-primary mb-2">92%</div>
+                                <h5>Submission Rate</h5>
+                                <div class="text-success small"><i class="fas fa-arrow-up me-1"></i> 5% from last period</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card mb-4">
+                            <div class="card-body text-center">
+                                <div class="display-4 text-primary mb-2">68%</div>
+                                <h5>Improvement Rate</h5>
+                                <div class="text-success small"><i class="fas fa-arrow-up me-1"></i> 7.5% from last period</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card mb-4">
+                            <div class="card-body text-center">
+                                <div class="display-4 text-primary mb-2">85%</div>
+                                <h5>Engagement Rate</h5>
+                                <div class="text-warning small"><i class="fas fa-arrow-down me-1"></i> 1.3% from last period</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Skill Distribution -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Skill Distribution</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="skillsChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Common Issues</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="issuesChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Student Performance Table -->
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card mb-4">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Student Performance</h5>
+                                <div class="input-group input-group-sm" style="width: 200px;">
+                                    <input type="text" class="form-control" placeholder="Search students...">
+                                    <button class="btn btn-outline-secondary" type="button"><i class="fas fa-search"></i></button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Student</th>
+                                                <th>Course</th>
+                                                <th>Avg. Score</th>
+                                                <th>Submissions</th>
+                                                <th>Improvement</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>John Smith</td>
+                                                <td>ENG201</td>
+                                                <td>85.2%</td>
+                                                <td>12/15</td>
+                                                <td><span class="badge bg-success">+8.3%</span></td>
+                                                <td><a href="#" class="btn btn-sm btn-outline-primary">View Details</a></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Sarah Johnson</td>
+                                                <td>ENG201</td>
+                                                <td>92.7%</td>
+                                                <td>15/15</td>
+                                                <td><span class="badge bg-success">+5.1%</span></td>
+                                                <td><a href="#" class="btn btn-sm btn-outline-primary">View Details</a></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Michael Brown</td>
+                                                <td>ENG101</td>
+                                                <td>68.5%</td>
+                                                <td>10/15</td>
+                                                <td><span class="badge bg-warning">+1.2%</span></td>
+                                                <td><a href="#" class="btn btn-sm btn-outline-primary">View Details</a></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Emily Davis</td>
+                                                <td>LIT305</td>
+                                                <td>88.9%</td>
+                                                <td>14/15</td>
+                                                <td><span class="badge bg-success">+6.7%</span></td>
+                                                <td><a href="#" class="btn btn-sm btn-outline-primary">View Details</a></td>
+                                            </tr>
+                                            <tr>
+                                                <td>David Wilson</td>
+                                                <td>ENG101</td>
+                                                <td>72.3%</td>
+                                                <td>12/15</td>
+                                                <td><span class="badge bg-danger">-2.1%</span></td>
+                                                <td><a href="#" class="btn btn-sm btn-outline-primary">View Details</a></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <div>
+                                        <span class="text-muted">Showing 5 of 35 students</span>
+                                    </div>
+                                    <nav>
+                                        <ul class="pagination pagination-sm mb-0">
+                                            <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+                                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                            <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Notifications Modal -->
+    <div class="modal fade" id="notificationsModal" tabindex="-1" aria-labelledby="notificationsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="notificationsModalLabel">Notifications</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="list-group">
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Analytics Report Ready</h6>
+                                <small>Just now</small>
+                            </div>
+                            <p class="mb-1">Your monthly analytics report is ready to view</p>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Student Performance Alert</h6>
+                                <small>2 days ago</small>
+                            </div>
+                            <p class="mb-1">3 students are showing declining performance trends</p>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">System Update</h6>
+                                <small>1 week ago</small>
+                            </div>
+                            <p class="mb-1">New analytics features have been added to the platform</p>
+                        </a>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Mark All as Read</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+    <script>
+        // Performance Chart
+        const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+        const performanceChart = new Chart(performanceCtx, {
+            type: 'line',
+            data: {
+                labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+                datasets: [{
+                    label: 'Average Scores',
+                    data: [72, 74, 75, 76, 78, 79],
+                    backgroundColor: 'rgba(67, 97, 238, 0.2)',
+                    borderColor: 'rgba(67, 97, 238, 1)',
+                    borderWidth: 2,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 60,
+                        max: 100
+                    }
+                }
+            }
+        });
+        
+        // Skills Chart
+        const skillsCtx = document.getElementById('skillsChart').getContext('2d');
+        const skillsChart = new Chart(skillsCtx, {
+            type: 'radar',
+            data: {
+                labels: ['Grammar', 'Content', 'Organization', 'Vocabulary', 'Critical Thinking', 'Research'],
+                datasets: [{
+                    label: 'Class Average',
+                    data: [75, 68, 72, 80, 65, 70],
+                    backgroundColor: 'rgba(67, 97, 238, 0.2)',
+                    borderColor: 'rgba(67, 97, 238, 1)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+        
+        // Issues Chart
+        const issuesCtx = document.getElementById('issuesChart').getContext('2d');
+        const issuesChart = new Chart(issuesCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Grammar', 'Citations', 'Structure', 'Analysis', 'Coherence'],
+                datasets: [{
+                    label: 'Frequency of Issues',
+                    data: [65, 42, 78, 53, 36],
+                    backgroundColor: [
+                        'rgba(220, 53, 69, 0.7)',
+                        'rgba(255, 193, 7, 0.7)',
+                        'rgba(13, 110, 253, 0.7)',
+                        'rgba(40, 167, 69, 0.7)',
+                        'rgba(108, 117, 125, 0.7)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
